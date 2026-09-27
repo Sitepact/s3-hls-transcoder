@@ -27,7 +27,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/bherila/s3-hls-imagehasher
+          images: ghcr.io/${{ github.repository_owner }}/s3-hls-imagehasher
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
