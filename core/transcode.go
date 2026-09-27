@@ -66,8 +66,14 @@ func buildHLSArgs(opts TranscodeOptions) []string {
 		if i > 0 {
 			scaleClauses += ";"
 		}
+		// format=yuv420p, because the encoder below asks libx264 for the main
+		// profile and main is 4:2:0 only. Without this, every 4:2:2 or 10-bit
+		// source fails with "main profile doesn't support 4:2:2": ProRes,
+		// MJPEG, DNxHD, HDV, which is most professional and stock footage.
+		// Converting in the filter graph keeps it per rung and costs nothing
+		// for sources that are already 4:2:0.
 		scaleClauses += fmt.Sprintf(
-			"[v%d]scale=w=%d:h=%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2[s%d]",
+			"[v%d]scale=w=%d:h=%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2,format=yuv420p[s%d]",
 			i, rung.Width, rung.Height, rung.Width, rung.Height, i)
 	}
 	filterComplex := splitClause + ";" + scaleClauses
